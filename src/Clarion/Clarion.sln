@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clarion", "Clarion\Clarion.csproj", "{23B82F62-775A-4278-9458-69C2DF418FB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clarion.Tests", "Clarion.Tests\Clarion.Tests.csproj", "{51C41118-ACFC-46F2-B93D-3B1E8269D870}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23B82F62-775A-4278-9458-69C2DF418FB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23B82F62-775A-4278-9458-69C2DF418FB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23B82F62-775A-4278-9458-69C2DF418FB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23B82F62-775A-4278-9458-69C2DF418FB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51C41118-ACFC-46F2-B93D-3B1E8269D870}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51C41118-ACFC-46F2-B93D-3B1E8269D870}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51C41118-ACFC-46F2-B93D-3B1E8269D870}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51C41118-ACFC-46F2-B93D-3B1E8269D870}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
