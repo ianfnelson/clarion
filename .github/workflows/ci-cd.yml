@@ -73,11 +73,8 @@ jobs:
     - name: Pack NuGet package
       run: dotnet pack src/Clarion/Clarion/Clarion.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts /p:Version=${{ steps.version.outputs.package_version }}
 
-    - name: Configure GitHub NuGet source
-      run: dotnet nuget add source --username ianfnelson --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/ianfnelson/index.json"
-
     - name: Publish to GitHub Packages
-      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "github" --skip-duplicate
+      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/ianfnelson/index.json" --skip-duplicate
 
     - name: Upload package artifacts
       uses: actions/upload-artifact@v4
