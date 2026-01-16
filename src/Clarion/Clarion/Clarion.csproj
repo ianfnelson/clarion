@@ -4,10 +4,28 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <!-- NuGet Package Configuration -->
+        <PackageId>Clarion</PackageId>
+        <Version>0.1.0</Version>
+        <Title>Clarion</Title>
+        <Authors>Ian Nelson</Authors>
+        <Description>A .NET library for fetching and parsing stock market announcements from Investegate.</Description>
+        <PackageProjectUrl>https://github.com/ianfnelson/clarion</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/ianfnelson/clarion</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>investegate;stocks;articles;finance;news</PackageTags>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="AngleSharp" Version="1.4.0" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>
