@@ -63,10 +63,6 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Calculate version
-      id: version
-      run: echo "package_version=0.1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
-
     - name: Restore dependencies
       run: dotnet restore src/Clarion/Clarion.sln
 
@@ -74,7 +70,7 @@ jobs:
       run: dotnet build src/Clarion/Clarion.sln --configuration ${{ env.CONFIGURATION }} --no-restore
 
     - name: Pack NuGet package
-      run: dotnet pack src/Clarion/Clarion/Clarion.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts /p:Version=${{ steps.version.outputs.package_version }}
+      run: dotnet pack src/Clarion/Clarion/Clarion.csproj --configuration ${{ env.CONFIGURATION }} --no-build --output ./artifacts
 
     - name: Publish to GitHub Packages
       run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source "https://nuget.pkg.github.com/ianfnelson/index.json" --skip-duplicate
