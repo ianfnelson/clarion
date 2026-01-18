@@ -11,7 +11,7 @@ using Clarion;
 var client = ClarionClient.Create();
 
 // Get article summaries for a ticker
-var articles = await client.GetArticlesAsync("LON:AAPL");
+var articles = await client.GetArticlesAsync("KNOS");
 
 foreach (var summary in articles)
 {
