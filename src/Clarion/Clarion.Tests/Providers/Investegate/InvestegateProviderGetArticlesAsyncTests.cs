@@ -1,5 +1,4 @@
 using System.Net;
-using Clarion.Models;
 using Clarion.Providers.Investegate;
 using Clarion.Tests.Providers.Investegate.TestHelpers;
 using FluentAssertions;
@@ -91,7 +90,7 @@ public class InvestegateProviderGetArticlesAsyncTests
         // Assert
         result.Should().HaveCount(1);
         // During GMT (winter), UK time equals UTC
-        result[0].PublishedAtUtc.Should().Be(new DateTime(2026, 1, 15, 7, 0, 0, DateTimeKind.Utc));
+        result[0].PublishedUtc.Should().Be(new DateTime(2026, 1, 15, 7, 0, 0, DateTimeKind.Utc));
     }
 
     [Fact]
@@ -110,7 +109,7 @@ public class InvestegateProviderGetArticlesAsyncTests
         result[0].Headline.Should().Be("Trading Update");
         result[1].Headline.Should().Be("Annual Results");
         // Verify order is preserved from the HTML
-        result[0].PublishedAtUtc.Should().BeAfter(result[1].PublishedAtUtc);
+        result[0].PublishedUtc.Should().BeAfter(result[1].PublishedUtc);
     }
 
     [Fact]
@@ -408,7 +407,7 @@ public class InvestegateProviderGetArticlesAsyncTests
         // Assert
         result.Should().HaveCount(1);
         result[0].Headline.Should().Be("Trading Update");
-        result[0].PublishedAtUtc.Should().Be(new DateTime(2026, 1, 15, 7, 0, 0, DateTimeKind.Utc));
+        result[0].PublishedUtc.Should().Be(new DateTime(2026, 1, 15, 7, 0, 0, DateTimeKind.Utc));
     }
 
     [Fact]

@@ -27,10 +27,10 @@ public sealed class ArticleSummary
     /// <summary>
     /// When the article was published, in UTC.
     /// </summary>
-    public required DateTime PublishedAtUtc { get; init; }
+    public required DateTime PublishedUtc { get; init; }
 
     /// <summary>
-    /// Canonical URL of the article, if available.
+    /// Canonical URL of the article.
     /// </summary>
-    public string? Url { get; init; }
+    public required string Url { get; init; }
 }

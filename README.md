@@ -15,7 +15,7 @@ var articles = await client.GetArticlesAsync("KNOS");
 
 foreach (var summary in articles)
 {
-    Console.WriteLine($"{summary.PublishedAtUtc}: {summary.Headline}");
+    Console.WriteLine($"{summary.PublishedUtc}: {summary.Headline}");
 }
 
 // Get full article details
@@ -55,14 +55,14 @@ Fetches the full article details for a specific article ID.
 - `Source` - Source system (e.g., "investegate")
 - `Ticker` - Stock ticker symbol
 - `Headline` - Article headline
-- `PublishedAtUtc` - Publication date and time (UTC)
+- `PublishedUtc` - Publication date and time (UTC)
 - `Url` - Canonical URL to the article
 
 **Article**
 - `SourceArticleId` - Unique identifier for the article
 - `Source` - Source system identifier
 - `Headline` - Article headline
-- `FetchedAtUtc` - When the article was fetched (UTC)
+- `RetrievedUtc` - When the article was fetched (UTC)
 - `Url` - Canonical URL to the article
 - `BodyHtml` - Raw HTML content
 - `BodyText` - Plain text version with normalized whitespace

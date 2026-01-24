@@ -4,7 +4,7 @@ using Clarion.Models;
 
 namespace Clarion.Providers.Investegate;
 
-public class InvestegateProvider(HttpClient httpClient) : IArticleProvider
+public partial class InvestegateProvider(HttpClient httpClient) : IArticleProvider
 {
     private const string BaseUrl = "https://www.investegate.co.uk";
     private static readonly TimeZoneInfo UkTimeZone = TimeZoneInfo.FindSystemTimeZoneById(
@@ -62,7 +62,7 @@ public class InvestegateProvider(HttpClient httpClient) : IArticleProvider
                 Source = "investegate",
                 Ticker = ticker,
                 Headline = headline,
-                PublishedAtUtc = utcDateTime,
+                PublishedUtc = utcDateTime,
                 Url = fullUrl
             });
         }
@@ -103,9 +103,9 @@ public class InvestegateProvider(HttpClient httpClient) : IArticleProvider
         var children = announcementContainer.Children.ToArray();
         var trackerIndex = Array.IndexOf(children, trackerImage);
 
-        for (int i = trackerIndex; i < children.Length; i++)
+        for (var i = trackerIndex; i < children.Length; i++)
         {
-            announcementContent.AppendChild(children[i].Clone(true));
+            announcementContent.AppendChild(children[i].Clone());
         }
 
         // Remove the first child (tracker image) from our virtual element
@@ -116,18 +116,22 @@ public class InvestegateProvider(HttpClient httpClient) : IArticleProvider
 
         // Convert to plain text
         var bodyText = announcementContent.TextContent;
+        
         // Normalize whitespace
-        bodyText = System.Text.RegularExpressions.Regex.Replace(bodyText, @"\s+", " ").Trim();
+        bodyText = WhitespaceRegex().Replace(bodyText, " ").Trim();
 
         return new Article
         {
             SourceArticleId = sourceArticleId,
             Source = "investegate",
             Headline = headline,
-            FetchedAtUtc = DateTime.UtcNow,
+            RetrievedUtc = DateTime.UtcNow,
             Url = url,
             BodyHtml = bodyHtml,
             BodyText = bodyText
         };
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"\s+")]
+    private static partial System.Text.RegularExpressions.Regex WhitespaceRegex();
 }
