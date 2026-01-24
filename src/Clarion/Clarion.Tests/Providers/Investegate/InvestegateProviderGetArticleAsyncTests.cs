@@ -73,6 +73,37 @@ public class InvestegateProviderGetArticleAsyncTests
     }
 
     [Fact]
+    public async Task GetArticleAsync_WithRealInvestegateHtml_8130950_ParsesCorrectly()
+    {
+        // Arrange - EQS announcement format with news-window div
+        var htmlPath = Path.Combine("Providers", "Investegate", "TestData", "Articles", "8130950.html");
+        var html = await File.ReadAllTextAsync(htmlPath);
+
+        var handler = CreateMockHandler(html);
+        var httpClient = new HttpClient(handler);
+        var provider = new InvestegateProvider(httpClient);
+
+        // Act
+        var result = await provider.GetArticleAsync("8130950");
+
+        // Assert
+        result.SourceArticleId.Should().Be("8130950");
+        result.Source.Should().Be("investegate");
+        result.Headline.Should().Be("Edison issues update on Seraphim Space Investment Trust (SSIT): Several key holdings funded to break-even");
+        result.Url.Should().Be("https://www.investegate.co.uk/announcement/8130950");
+        result.RetrievedUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+
+        // Body text should contain key announcement content
+        result.BodyText.Should().Contain("Edison Investment Research Limited");
+        result.BodyText.Should().Contain("London, UK, 10 April 2024");
+        result.BodyText.Should().Contain("Seraphim Space Investment Trust");
+
+        // Body HTML should contain actual content
+        result.BodyHtml.Should().Contain("Edison Investment Research Limited");
+        result.BodyHtml.Should().Contain("eqs-announcement");
+    }
+
+    [Fact]
     public async Task GetArticleAsync_WithMissingH1_ThrowsInvalidOperationException()
     {
         // Arrange
