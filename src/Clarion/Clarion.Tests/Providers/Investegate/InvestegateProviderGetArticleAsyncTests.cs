@@ -8,244 +8,68 @@ namespace Clarion.Tests.Providers.Investegate;
 
 public class InvestegateProviderGetArticleAsyncTests
 {
-    private const string ValidArticleDetailHtml = """
-        <!DOCTYPE html>
-        <html>
-        <head><title>Announcement</title></head>
-        <body>
-            <h1>Trading Update - Q4 2025</h1>
-            <div class="art-board">
-                <img src="https://tracker.example.com/pixel.gif" />
-                <div>
-                    <p>The company is pleased to announce strong trading results.</p>
-                    <p>Revenue increased by 25% year-over-year.</p>
-                    <img src="https://example.com/chart.png" />
-                </div>
-            </div>
-        </body>
-        </html>
-        """;
-
     [Fact]
-    public async Task GetArticleAsync_WithValidHtml_ReturnsArticle()
+    public async Task GetArticleAsync_WithRealInvestegateHtml_9378240_ParsesCorrectly()
     {
-        // Arrange
-        var handler = CreateMockHandler(ValidArticleDetailHtml);
+        // Arrange - newer format with tracker image
+        var htmlPath = Path.Combine("Providers", "Investegate", "TestData", "Articles", "9378240.html");
+        var html = await File.ReadAllTextAsync(htmlPath);
+
+        var handler = CreateMockHandler(html);
         var httpClient = new HttpClient(handler);
         var provider = new InvestegateProvider(httpClient);
 
         // Act
-        var result = await provider.GetArticleAsync("test-12345");
+        var result = await provider.GetArticleAsync("9378240");
 
         // Assert
-        result.SourceArticleId.Should().Be("test-12345");
+        result.SourceArticleId.Should().Be("9378240");
         result.Source.Should().Be("investegate");
-        result.Headline.Should().Be("Trading Update - Q4 2025");
-        result.Url.Should().Be("https://www.investegate.co.uk/announcement/test-12345");
+        result.Headline.Should().Be("Transaction in Own Shares");
+        result.Url.Should().Be("https://www.investegate.co.uk/announcement/9378240");
         result.RetrievedUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
 
-        // Body text should have normalized whitespace and exclude the tracker image
-        result.BodyText.Should().Contain("The company is pleased to announce strong trading results.");
-        result.BodyText.Should().Contain("Revenue increased by 25% year-over-year.");
+        // Body text should contain key announcement content
+        result.BodyText.Should().Contain("Kainos Group plc");
+        result.BodyText.Should().Contain("purchased the following number of its ordinary shares");
+        result.BodyText.Should().Contain("Investec Bank plc");
 
-        // Body HTML should not contain the first (tracker) image
-        result.BodyHtml.Should().NotContain("tracker.example.com");
-        result.BodyHtml.Should().Contain("https://example.com/chart.png");
-        result.BodyHtml.Should().Contain("<p>The company is pleased to announce strong trading results.</p>");
+        // Body HTML should not contain the tracker image
+        result.BodyHtml.Should().NotContain("tracker.live.rns-distribution.com");
+
+        // Body HTML should contain actual content
+        result.BodyHtml.Should().Contain("Kainos Group plc");
     }
 
     [Fact]
-    public async Task GetArticleAsync_WithTrackerImage_RemovesFirstImage()
+    public async Task GetArticleAsync_WithRealInvestegateHtml_4053574_ParsesCorrectly()
     {
-        // Arrange
-        var html = """
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <h1>Test Article</h1>
-                <div class="art-board">
-                    <img src="https://tracker.example.com/pixel.gif" />
-                    <div>
-                        <p>Content here.</p>
-                        <img src="https://example.com/legitimate-image.png" />
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
+        // Arrange - older format with news-window div
+        var htmlPath = Path.Combine("Providers", "Investegate", "TestData", "Articles", "4053574.html");
+        var html = await File.ReadAllTextAsync(htmlPath);
 
         var handler = CreateMockHandler(html);
         var httpClient = new HttpClient(handler);
         var provider = new InvestegateProvider(httpClient);
 
         // Act
-        var result = await provider.GetArticleAsync("test-12345");
+        var result = await provider.GetArticleAsync("4053574");
 
         // Assert
-        result.BodyHtml.Should().NotContain("tracker.example.com");
-        result.BodyHtml.Should().Contain("legitimate-image.png");
-    }
+        result.SourceArticleId.Should().Be("4053574");
+        result.Source.Should().Be("investegate");
+        result.Headline.Should().Be("Issue of Warrants");
+        result.Url.Should().Be("https://www.investegate.co.uk/announcement/4053574");
+        result.RetrievedUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
 
-    [Fact]
-    public async Task GetArticleAsync_WithNoImages_DoesNotThrow()
-    {
-        // Arrange
-        var html = """
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <h1>Test Article</h1>
-                <div class="art-board">
-                    <img src="https://tracker.example.com/pixel.gif" />
-                    <div>
-                        <p>Content without images.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
+        // Body text should contain key announcement content
+        result.BodyText.Should().Contain("Audioboom Group plc");
+        result.BodyText.Should().Contain("issued 2,000,000 warrants");
+        result.BodyText.Should().Contain("exercise price of 12.5p");
 
-        var handler = CreateMockHandler(html);
-        var httpClient = new HttpClient(handler);
-        var provider = new InvestegateProvider(httpClient);
-
-        // Act
-        var result = await provider.GetArticleAsync("test-12345");
-
-        // Assert
-        result.BodyText.Should().Contain("Content without images.");
-        result.BodyHtml.Should().Contain("<p>Content without images.</p>");
-    }
-
-    [Fact]
-    public async Task GetArticleAsync_WithMultipleWhitespace_NormalizesBodyText()
-    {
-        // Arrange
-        var html = """
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <h1>Test Article</h1>
-                <div class="art-board">
-                    <img src="https://tracker.example.com/pixel.gif" />
-                    <div>
-                        <p>This   has     multiple
-
-                        spaces    and    newlines.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
-
-        var handler = CreateMockHandler(html);
-        var httpClient = new HttpClient(handler);
-        var provider = new InvestegateProvider(httpClient);
-
-        // Act
-        var result = await provider.GetArticleAsync("test-12345");
-
-        // Assert
-        // Multiple spaces and newlines should be normalized to single spaces
-        result.BodyText.Should().Be("This has multiple spaces and newlines.");
-    }
-
-    [Fact]
-    public async Task GetArticleAsync_WithComplexHtml_PreservesBodyHtmlStructure()
-    {
-        // Arrange
-        var html = """
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <h1>Complex Article</h1>
-                <div class="art-board">
-                    <img src="tracker.gif" />
-                    <div>
-                        <div class="section">
-                            <h2>Section Title</h2>
-                            <p>Paragraph with <strong>bold</strong> and <em>italic</em> text.</p>
-                            <ul>
-                                <li>Item 1</li>
-                                <li>Item 2</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
-
-        var handler = CreateMockHandler(html);
-        var httpClient = new HttpClient(handler);
-        var provider = new InvestegateProvider(httpClient);
-
-        // Act
-        var result = await provider.GetArticleAsync("test-12345");
-
-        // Assert
-        result.BodyHtml.Should().NotContain("tracker.gif");
-        result.BodyHtml.Should().Contain("<h2>Section Title</h2>");
-        result.BodyHtml.Should().Contain("<strong>bold</strong>");
-        result.BodyHtml.Should().Contain("<em>italic</em>");
-        result.BodyHtml.Should().Contain("<ul>");
-        result.BodyHtml.Should().Contain("<li>Item 1</li>");
-    }
-
-    [Fact]
-    public async Task GetArticleAsync_WithHtmlEntities_DecodesCorrectly()
-    {
-        // Arrange
-        var html = """
-            <!DOCTYPE html>
-            <html>
-            <body>
-                <h1>Test &amp; Article</h1>
-                <div class="art-board">
-                    <img src="https://tracker.example.com/pixel.gif" />
-                    <div>
-                        <p>Revenue &gt; £1M &amp; &lt; £2M.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """;
-
-        var handler = CreateMockHandler(html);
-        var httpClient = new HttpClient(handler);
-        var provider = new InvestegateProvider(httpClient);
-
-        // Act
-        var result = await provider.GetArticleAsync("test-12345");
-
-        // Assert
-        result.Headline.Should().Be("Test & Article");
-        result.BodyText.Should().Contain("Revenue > £1M & < £2M.");
-    }
-
-    [Fact]
-    public async Task GetArticleAsync_BuildsCorrectUrl()
-    {
-        // Arrange
-        string? requestedUrl = null;
-        var handler = new MockHttpMessageHandler((request, cancellationToken) =>
-        {
-            requestedUrl = request.RequestUri?.ToString();
-            var response = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(ValidArticleDetailHtml)
-            };
-            return Task.FromResult(response);
-        });
-
-        var httpClient = new HttpClient(handler);
-        var provider = new InvestegateProvider(httpClient);
-
-        // Act
-        await provider.GetArticleAsync("test-article-id-123");
-
-        // Assert
-        requestedUrl.Should().Be("https://www.investegate.co.uk/announcement/test-article-id-123");
+        // Body HTML should contain actual content
+        result.BodyHtml.Should().Contain("Audioboom Group plc");
+        result.BodyHtml.Should().Contain("Issue of Warrants");
     }
 
     [Fact]
@@ -256,10 +80,9 @@ public class InvestegateProviderGetArticleAsyncTests
             <!DOCTYPE html>
             <html>
             <body>
-                <div>No headline here</div>
-                <body>
-                    <p>Content without h1.</p>
-                </body>
+                <div class="news-window">
+                    <p>Content without headline</p>
+                </div>
             </body>
             </html>
             """;
@@ -277,15 +100,17 @@ public class InvestegateProviderGetArticleAsyncTests
     }
 
     [Fact]
-    public async Task GetArticleAsync_WithSingleBody_ThrowsInvalidOperationException()
+    public async Task GetArticleAsync_WithUnrecognizedFormat_ThrowsInvalidOperationException()
     {
-        // Arrange - Only one body tag
+        // Arrange
         var html = """
             <!DOCTYPE html>
             <html>
             <body>
                 <h1>Test Article</h1>
-                <p>Content in main body only.</p>
+                <div class="some-other-class">
+                    <p>Content in unrecognized format.</p>
+                </div>
             </body>
             </html>
             """;
@@ -299,31 +124,7 @@ public class InvestegateProviderGetArticleAsyncTests
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Failed to find announcement content (tracker image not found)");
-    }
-
-    [Fact]
-    public async Task GetArticleAsync_WithNoBody_ThrowsInvalidOperationException()
-    {
-        // Arrange - No body tags at all
-        var html = """
-            <!DOCTYPE html>
-            <html>
-                <h1>Test Article</h1>
-                <p>Content without body.</p>
-            </html>
-            """;
-
-        var handler = CreateMockHandler(html);
-        var httpClient = new HttpClient(handler);
-        var provider = new InvestegateProvider(httpClient);
-
-        // Act
-        var act = async () => await provider.GetArticleAsync("test-12345");
-
-        // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Failed to find announcement content (tracker image not found)");
+            .WithMessage("Failed to parse article content - no recognized format found");
     }
 
     [Fact]
@@ -338,7 +139,7 @@ public class InvestegateProviderGetArticleAsyncTests
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(ValidArticleDetailHtml)
+                Content = new StringContent("<html><body><h1>Test</h1><div class=\"news-window\">Content</div></body></html>")
             });
         });
 

@@ -85,16 +85,42 @@ public partial class InvestegateProvider(HttpClient httpClient) : IArticleProvid
 
         var headline = headlineElement.TextContent.Trim();
 
-        // Find the tracker image (RNS announcements include a tracking pixel)
-        var trackerImage = document.QuerySelector("img[src*='tracker']") ??
-                          document.QuerySelector("img[src*='rns-distribution']");
+        // Try different parsing strategies based on article format
+        var (bodyHtml, bodyText) = TryParseNewsWindowWithTrackerFormat(document)
+                                   ?? TryParseNewsWindowFormat(document)
+                                   ?? throw new InvalidOperationException("Failed to parse article content - no recognized format found");
+
+        return new Article
+        {
+            SourceArticleId = sourceArticleId,
+            Source = "investegate",
+            Headline = headline,
+            RetrievedUtc = DateTime.UtcNow,
+            Url = url,
+            BodyHtml = bodyHtml,
+            BodyText = bodyText
+        };
+    }
+
+    /// <summary>
+    /// Attempts to parse newer article format where news-window contains a nested HTML document with a tracker image
+    /// </summary>
+    private static (string bodyHtml, string bodyText)? TryParseNewsWindowWithTrackerFormat(AngleSharp.Dom.IDocument document)
+    {
+        var newsWindow = document.QuerySelector("div.news-window");
+        if (newsWindow == null)
+            return null;
+
+        // Check if there's a tracker image within the news-window
+        var trackerImage = newsWindow.QuerySelector("img[src*='tracker']") ??
+                          newsWindow.QuerySelector("img[src*='rns-distribution']");
         if (trackerImage == null)
-            throw new InvalidOperationException("Failed to find announcement content (tracker image not found)");
+            return null;
 
         // Get the parent container that holds the announcement content
         var announcementContainer = trackerImage.ParentElement;
         if (announcementContainer == null)
-            throw new InvalidOperationException("Failed to find announcement container");
+            return null;
 
         // Create a virtual element to hold just the announcement content
         var announcementContent = document.CreateElement("div");
@@ -116,20 +142,27 @@ public partial class InvestegateProvider(HttpClient httpClient) : IArticleProvid
 
         // Convert to plain text
         var bodyText = announcementContent.TextContent;
-        
+
         // Normalize whitespace
         bodyText = WhitespaceRegex().Replace(bodyText, " ").Trim();
 
-        return new Article
-        {
-            SourceArticleId = sourceArticleId,
-            Source = "investegate",
-            Headline = headline,
-            RetrievedUtc = DateTime.UtcNow,
-            Url = url,
-            BodyHtml = bodyHtml,
-            BodyText = bodyText
-        };
+        return (bodyHtml, bodyText);
+    }
+
+    /// <summary>
+    /// Attempts to parse older article format where content is directly in a div with class "news-window"
+    /// </summary>
+    private static (string bodyHtml, string bodyText)? TryParseNewsWindowFormat(AngleSharp.Dom.IDocument document)
+    {
+        var newsWindow = document.QuerySelector("div.news-window");
+        if (newsWindow == null)
+            return null;
+
+        var bodyHtml = newsWindow.InnerHtml;
+        var bodyText = newsWindow.TextContent;
+        bodyText = WhitespaceRegex().Replace(bodyText, " ").Trim();
+
+        return (bodyHtml, bodyText);
     }
 
     [System.Text.RegularExpressions.GeneratedRegex(@"\s+")]

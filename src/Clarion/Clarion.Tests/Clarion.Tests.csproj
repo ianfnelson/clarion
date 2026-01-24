@@ -26,4 +26,15 @@
         <ProjectReference Include="..\Clarion\Clarion.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Providers\Investegate\TestData\Articles\9378240.html" />
+      <Content Include="Providers\Investegate\TestData\Articles\9378240.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Providers\Investegate\TestData\Articles\4053574.html" />
+      <Content Include="Providers\Investegate\TestData\Articles\4053574.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
