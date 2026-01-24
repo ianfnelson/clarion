@@ -42,7 +42,7 @@ public class InvestegateProviderGetArticleAsyncTests
         result.Source.Should().Be("investegate");
         result.Headline.Should().Be("Trading Update - Q4 2025");
         result.Url.Should().Be("https://www.investegate.co.uk/announcement/test-12345");
-        result.FetchedAtUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        result.RetrievedUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
 
         // Body text should have normalized whitespace and exclude the tracker image
         result.BodyText.Should().Contain("The company is pleased to announce strong trading results.");

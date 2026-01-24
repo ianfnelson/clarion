@@ -21,12 +21,12 @@ public sealed class Article
     /// <summary>
     /// When Clarion fetched the article, in UTC.
     /// </summary>
-    public required DateTime FetchedAtUtc { get; init; }
+    public required DateTime RetrievedUtc { get; init; }
 
     /// <summary>
     /// Canonical URL of the article.
     /// </summary>
-    public string? Url { get; init; }
+    public required string Url { get; init; }
 
     /// <summary>
     /// Raw HTML body as published.
