@@ -83,7 +83,7 @@ public partial class InvestegateProvider(HttpClient httpClient) : IArticleProvid
         if (headlineElement == null)
             throw new InvalidOperationException("Failed to find headline element");
 
-        var headline = headlineElement.TextContent.Trim();
+        var headline = WhitespaceRegex().Replace(headlineElement.TextContent, " ").Trim();
 
         // Try different parsing strategies based on article format
         var (bodyHtml, bodyText) = TryParseNewsWindowWithTrackerFormat(document)
